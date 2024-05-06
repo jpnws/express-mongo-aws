@@ -1,0 +1,10 @@
+node_modules
+src
+*.ts
+*.map
+.git
+.gitignore
+.vscode
+README.md
+tsconfig.json
+nodemon.json
