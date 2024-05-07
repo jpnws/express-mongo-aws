@@ -157,7 +157,7 @@ export class InfraStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),
         healthyThresholdCount: 2,
         unhealthyThresholdCount: 3,
-        protocol: elb.Protocol.HTTPS,
+        protocol: elb.Protocol.HTTP,
       },
     });
 
