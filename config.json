@@ -1,0 +1,5 @@
+{
+  "domain_name": "jpnws.link",
+  "backend_subdomain": "express-backend",
+  "frontend_subdomain": "express-frontend"
+}
