@@ -148,6 +148,7 @@ export class InfraStack extends cdk.Stack {
     // Add the ECS service as a target to the load balancer listener.
     loadBalancerListener.addTargets("ECS", {
       port: 3000,
+      protocol: elb.ApplicationProtocol.HTTP,
       targets: [ecsService],
       healthCheck: {
         interval: cdk.Duration.seconds(30),
