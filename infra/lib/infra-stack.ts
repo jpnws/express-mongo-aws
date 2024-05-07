@@ -139,9 +139,10 @@ export class InfraStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    // Add a listener to the load balancer and targets to listen.
+    // Add a listener to the load balancer.
     const loadBalancerListener = loadBalancer.addListener("Listener", {
       port: 443,
+      protocol: elb.ApplicationProtocol.HTTPS,
       certificates: [certificate],
     });
 
