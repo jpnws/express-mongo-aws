@@ -89,7 +89,9 @@ export class InfraStack extends cdk.Stack {
 
     // Add a container to the task definition.
     ecsTaskDefinition.addContainer("PayloadContainer", {
-      image: ecs.ContainerImage.fromAsset(resolve(__dirname, "../../server")),
+      image: ecs.ContainerImage.fromAsset(
+        resolve(__dirname, "..", "..", "server")
+      ),
       memoryLimitMiB: 512,
       cpu: 256,
       secrets: {
