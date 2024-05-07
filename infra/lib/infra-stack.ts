@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as cmg from "aws-cdk-lib/aws-certificatemanager";
+import * as ddb from "aws-cdk-lib/aws-docdb";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as elb from "aws-cdk-lib/aws-elasticloadbalancingv2";
@@ -60,6 +61,48 @@ export class InfraStack extends cdk.Stack {
       validation: cmg.CertificateValidation.fromDns(hostedZone),
       // Secure all subdomains under the primary domain
       subjectAlternativeNames: [`*.${domainName}`],
+    });
+
+    // * =====================================
+    // * DocumentDB
+    // * =====================================
+
+    // Define the security group for the DocumentDB cluster.
+    const docDbSecurityGroup = new ec2.SecurityGroup(
+      this,
+      "DocumentDBSecurityGroup",
+      {
+        vpc: vpc,
+      }
+    );
+
+    // Retrieve the DocumentDB credentials from Secrets Manager. The credentials
+    // must have been created in the AWS Management Console manually, where the
+    // name of the secret should be "universal/db/credentials".
+    const docDbCredentials = smg.Secret.fromSecretNameV2(
+      this,
+      "DocDBCredentials",
+      "universal/db/credentials"
+    );
+
+    const docDbCluster = new ddb.DatabaseCluster(this, "DocDB", {
+      masterUser: {
+        username: docDbCredentials
+          .secretValueFromJson("dbMainUsername")
+          .toString(),
+        password: docDbCredentials.secretValueFromJson("dbMainPassword"),
+      },
+      vpc: vpc,
+      vpcSubnets: vpc.selectSubnets({ subnetGroupName: "private" }),
+      instanceType: ec2.InstanceType.of(
+        ec2.InstanceClass.T3,
+        ec2.InstanceSize.MEDIUM
+      ),
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      // Define the security group for DocumentDB. You must define the security
+      // group to allow incoming traffic from the containerized application's
+      // security group.
+      securityGroup: docDbSecurityGroup,
     });
 
     // * =====================================
