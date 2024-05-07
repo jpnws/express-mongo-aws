@@ -104,6 +104,7 @@ export class InfraStack extends cdk.Stack {
         {
           // Expose the container port.
           containerPort: 3000,
+          protocol: ecs.Protocol.TCP,
         },
       ],
       logging: ecs.LogDriver.awsLogs({
