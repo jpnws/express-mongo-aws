@@ -4,7 +4,6 @@ import * as ddb from "aws-cdk-lib/aws-docdb";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as elb from "aws-cdk-lib/aws-elasticloadbalancingv2";
-import * as iam from "aws-cdk-lib/aws-iam";
 import * as lgp from "aws-cdk-lib/aws-logs";
 import * as r53 from "aws-cdk-lib/aws-route53";
 import * as rtg from "aws-cdk-lib/aws-route53-targets";
@@ -138,10 +137,21 @@ export class InfraStack extends cdk.Stack {
       ),
       memoryLimitMiB: 512,
       cpu: 256,
+      environment: {
+        DB_HOST: docDbCluster.clusterEndpoint.hostname,
+      },
       secrets: {
         PAYLOAD_SECRET: ecs.Secret.fromSecretsManager(
           payloadSecret,
           "payloadSecret"
+        ),
+        DB_USERNAME: ecs.Secret.fromSecretsManager(
+          docDbCredentials,
+          "dbMainUsername"
+        ),
+        DB_PASSWORD: ecs.Secret.fromSecretsManager(
+          docDbCredentials,
+          "dbMainPassword"
         ),
       },
       portMappings: [
@@ -215,15 +225,7 @@ export class InfraStack extends cdk.Stack {
     docDbSecurityGroup.addIngressRule(
       ecsSecurityGroup,
       ec2.Port.tcp(27017),
-      "Allow MongoDB traffic from ECS"
-    );
-
-    // Grant the ECS task permission to access the DocumentDB credentials.
-    ecsTaskDefinition.taskRole.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        actions: ["secretsmanager:GetSecretValue"],
-        resources: [docDbCredentials.secretArn],
-      })
+      "Allow DocumentDB traffic from ECS"
     );
 
     // Ensure that the ECS service depends on the DocumentDB cluster. This means
