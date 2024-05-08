@@ -15,15 +15,22 @@ app.get("/secrets", (_req: Request, res: Response) => {
 });
 
 app.get("/dbconnect", async (_req: Request, res: Response) => {
-  const uri = `mongodb://${process.env["DB_USERNAME"]}:${process.env["DB_PASSWORD"]}@${process.env["DB_HOST"]}:27017/testdb`;
-  const client: mongoDB.MongoClient = new mongoDB.MongoClient(uri);
-  await client.connect();
-  const db = client.db("testdb");
-  const collection = db.collection("testcollection");
-  await collection.insertOne({ key: "random", value: Math.random() });
-  const doc = await collection.findOne({ key: "random" });
-  console.log(doc);
-  res.send(doc);
+  const uri = `mongodb://${process.env["DB_USERNAME"]}:${process.env["DB_PASSWORD"]}@${process.env["DB_HOST"]}:27017/testdb?tls=true&tlsCAFile=global-bundle.pem&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`;
+  let client: mongoDB.MongoClient = new mongoDB.MongoClient(uri);
+  try {
+    await client.connect();
+    const db = client.db("testdb");
+    const collection = db.collection("testcollection");
+    await collection.insertOne({ key: "random", value: Math.random() });
+    const doc = await collection.findOne({ key: "random" });
+    console.log(doc);
+    res.send(doc);
+  } catch (error) {
+    console.error("Failed to connect to the database:", error);
+    res.status(500).send("Failed to connect to the database");
+  } finally {
+    await client.close();
+  }
 });
 
 app.get("/health", (_req: Request, res: Response) => {
