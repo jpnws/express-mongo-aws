@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install dependencies.
 RUN npm install --production
 
+# Download the CA certificate
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /usr/src/app/global-bundle.pem
+
 # Copy the rest of the application files.
 COPY dist/ dist/
 
