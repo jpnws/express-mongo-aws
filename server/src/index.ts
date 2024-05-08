@@ -4,14 +4,7 @@ import * as mongoDB from "mongodb";
 const app = express();
 
 app.get("/", (_req: Request, res: Response) => {
-  res.send("Hello World!123123");
-});
-
-// Adding a new route to display the PAYLOAD_SECRET
-app.get("/secrets", (_req: Request, res: Response) => {
-  res.send(
-    `PAYLOAD_SECRET: ${process.env["PAYLOAD_SECRET"]} DB_USERNAME: ${process.env["DB_USERNAME"]} DB_PASSWORD: ${process.env["DB_PASSWORD"]} DB_HOST: ${process.env["DB_HOST"]}`
-  );
+  res.send("Hello World!");
 });
 
 app.get("/dbconnect", async (_req: Request, res: Response) => {
